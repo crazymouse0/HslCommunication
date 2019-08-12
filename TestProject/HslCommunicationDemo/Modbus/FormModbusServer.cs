@@ -20,20 +20,6 @@ namespace HslCommunicationDemo
             InitializeComponent( );
         }
 
-
-
-        private void linkLabel1_LinkClicked( object sender, LinkLabelLinkClickedEventArgs e )
-        {
-            try
-            {
-                System.Diagnostics.Process.Start( linkLabel1.Text );
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show( ex.Message );
-            }
-        }
-
         private void FormSiemens_Load( object sender, EventArgs e )
         {
             panel2.Enabled = false;
@@ -42,6 +28,74 @@ namespace HslCommunicationDemo
             comboBox2.SelectedIndex = 0;
             comboBox2.SelectedIndexChanged += ComboBox2_SelectedIndexChanged;
             checkBox3.CheckedChanged += CheckBox3_CheckedChanged;
+            checkBox2.CheckedChanged += CheckBox2_CheckedChanged;
+
+            if (Program.Language == 2)
+            {
+                Text = "Modbus Virtual Server[supports TCP and RTU, support coil and register reading and writing, input register read, discrete input read]";
+                label3.Text = "port:";
+                button1.Text = "Start Server";
+                button11.Text = "Close Server";
+                label11.Text = "This server is not a strict S7 protocol and only supports perfect communication with HSL components.";
+                label19.Text = "Note: The string of values needs to be converted to the corresponding data type";
+                button4.Text = "Connecting Alien client";
+                groupBox1.Text = "Single Data Read test";
+                label6.Text = "Adderss:";
+                label7.Text = "Result";
+                button_read_bool.Text = "r-coil";
+                button6.Text = "r-Discr";
+                button_read_short.Text = "r-short";
+                button_read_ushort.Text = "r-ushort";
+                button_read_int.Text = "r-int";
+                button_read_uint.Text = "r-uint";
+                button_read_long.Text = "r-long";
+                button_read_ulong.Text = "r-ulong";
+                button_read_float.Text = "r-float";
+                button_read_double.Text = "r-double";
+                button_read_string.Text = "r-string";
+                label8.Text = "length";
+
+                label10.Text = "Address:";
+                label9.Text = "Value";
+                groupBox2.Text = "Single Data Write test";
+                button24.Text = "w-coil";
+                button7.Text = "w-Discr";
+                button22.Text = "w-short";
+                button21.Text = "w-ushort";
+                button20.Text = "w-int";
+                button19.Text = "w-uint";
+                button18.Text = "w-long";
+                button17.Text = "w-ulong";
+                button16.Text = "w-float";
+                button15.Text = "w-double";
+                button14.Text = "w-string";
+
+                button8.Text = "Load";
+                button9.Text = "Save";
+                button10.Text = "Timed writing";
+                label1.Text = "log:";
+                checkBox1.Text = "Display received data";
+                checkBox2.Text = "Account Login";
+                label16.Text = "Client-Online:";
+
+                button3.Text = "filter-cli";
+                label14.Text = "Com:";
+                button5.Text = "Open Com";
+                checkBox3.Text = "str-reverse";
+                groupBox4.Text = "Data subscriptions";
+                label12.Text = "add-monitor";
+                label13.Text = "value:";
+                button2.Text = "monitor";
+                label11.Text = "w-time:";
+            }
+        }
+
+        private void CheckBox2_CheckedChanged( object sender, EventArgs e )
+        {
+            if (busTcpServer != null)
+            {
+                busTcpServer.IsUseAccountCertificate = checkBox2.Checked;
+            }
         }
 
         private void ComboBox2_SelectedIndexChanged( object sender, EventArgs e )
@@ -93,7 +147,7 @@ namespace HslCommunicationDemo
         /// <param name="address"></param>
         private void writeResultRender( string address )
         {
-            MessageBox.Show( DateTime.Now.ToString( "[HH:mm:ss] " ) + $"[{address}] 写入成功" );
+            MessageBox.Show( DateTime.Now.ToString( "[HH:mm:ss] " ) + $"[{address}] Write Success" );
         }
 
 
@@ -106,7 +160,7 @@ namespace HslCommunicationDemo
         {
             if (!int.TryParse( textBox2.Text, out int port ))
             {
-                MessageBox.Show( "端口输入不正确！" );
+                MessageBox.Show( DemoUtils.PortInputWrong );
                 return;
             }
 
@@ -118,6 +172,11 @@ namespace HslCommunicationDemo
                 busTcpServer.LogNet = new HslCommunication.LogNet.LogNetSingle( "logs.txt" );        // 配置日志信息
                 busTcpServer.LogNet.BeforeSaveToFile += LogNet_BeforeSaveToFile;
                 busTcpServer.OnDataReceived += BusTcpServer_OnDataReceived;
+
+                // add some accounts
+                busTcpServer.AddAccount( "admin", "123456" );
+                busTcpServer.AddAccount( "hsl", "test" );
+                busTcpServer.UseSynchronousNet = checkBox2.Checked;
 
                 ComboBox2_SelectedIndexChanged( null, new EventArgs( ) );
                 busTcpServer.IsStringReverse = checkBox3.Checked;
@@ -154,17 +213,17 @@ namespace HslCommunicationDemo
             label15.Text = busTcpServer.OnlineCount.ToString( ) ;
         }
 
-        private void BusTcpServer_OnDataReceived( HslCommunication.ModBus.ModbusTcpServer tcpServer, byte[] modbus )
+        private void BusTcpServer_OnDataReceived( object sender, byte[] modbus )
         {
             if (!checkBox1.Checked) return;
 
             if (InvokeRequired)
             {
-                BeginInvoke( new Action<HslCommunication.ModBus.ModbusTcpServer,byte[]>( BusTcpServer_OnDataReceived ), tcpServer, modbus );
+                BeginInvoke( new Action<object,byte[]>( BusTcpServer_OnDataReceived ), sender, modbus );
                 return;
             }
 
-            textBox1.AppendText( "接收数据：" + HslCommunication.BasicFramework.SoftBasic.ByteToHexString( modbus, ' ' ) + Environment.NewLine );
+            textBox1.AppendText( "Received：" + HslCommunication.BasicFramework.SoftBasic.ByteToHexString( modbus, ' ' ) + Environment.NewLine );
         }
 
         /// <summary>
@@ -212,53 +271,53 @@ namespace HslCommunicationDemo
         private void button_read_short_Click( object sender, EventArgs e )
         {
             // 读取short变量
-            readResultRender( busTcpServer.ReadInt16( textBox3.Text ), textBox3.Text, textBox4 );
+            DemoUtils.ReadResultRender( busTcpServer.ReadInt16( textBox3.Text ), textBox3.Text, textBox4 );
         }
 
         private void button_read_ushort_Click( object sender, EventArgs e )
         {
             // 读取ushort变量
-            readResultRender( busTcpServer.ReadUInt16( textBox3.Text ), textBox3.Text, textBox4 );
+            DemoUtils.ReadResultRender( busTcpServer.ReadUInt16( textBox3.Text ), textBox3.Text, textBox4 );
         }
 
         private void button_read_int_Click( object sender, EventArgs e )
         {
             // 读取int变量
-            readResultRender( busTcpServer.ReadInt32( textBox3.Text ), textBox3.Text, textBox4 );
+            DemoUtils.ReadResultRender( busTcpServer.ReadInt32( textBox3.Text ), textBox3.Text, textBox4 );
         }
         private void button_read_uint_Click( object sender, EventArgs e )
         {
             // 读取uint变量
-            readResultRender( busTcpServer.ReadUInt32( textBox3.Text ), textBox3.Text, textBox4 );
+            DemoUtils.ReadResultRender( busTcpServer.ReadUInt32( textBox3.Text ), textBox3.Text, textBox4 );
         }
         private void button_read_long_Click( object sender, EventArgs e )
         {
             // 读取long变量
-            readResultRender( busTcpServer.ReadInt64( textBox3.Text ), textBox3.Text, textBox4 );
+            DemoUtils.ReadResultRender( busTcpServer.ReadInt64( textBox3.Text ), textBox3.Text, textBox4 );
         }
 
         private void button_read_ulong_Click( object sender, EventArgs e )
         {
             // 读取ulong变量
-            readResultRender( busTcpServer.ReadUInt64( textBox3.Text ), textBox3.Text, textBox4 );
+            DemoUtils.ReadResultRender( busTcpServer.ReadUInt64( textBox3.Text ), textBox3.Text, textBox4 );
         }
 
         private void button_read_float_Click( object sender, EventArgs e )
         {
             // 读取float变量
-            readResultRender( busTcpServer.ReadFloat( textBox3.Text ), textBox3.Text, textBox4 );
+            DemoUtils.ReadResultRender( busTcpServer.ReadFloat( textBox3.Text ), textBox3.Text, textBox4 );
         }
 
         private void button_read_double_Click( object sender, EventArgs e )
         {
             // 读取double变量
-            readResultRender( busTcpServer.ReadDouble( textBox3.Text ), textBox3.Text, textBox4 );
+            DemoUtils.ReadResultRender( busTcpServer.ReadDouble( textBox3.Text ), textBox3.Text, textBox4 );
         }
 
         private void button_read_string_Click( object sender, EventArgs e )
         {
             // 读取字符串
-            readResultRender( busTcpServer.ReadString( textBox3.Text, ushort.Parse( textBox5.Text ) ), textBox3.Text, textBox4 );
+            DemoUtils.ReadResultRender( busTcpServer.ReadString( textBox3.Text, ushort.Parse( textBox5.Text ) ), textBox3.Text, textBox4 );
         }
 
 
@@ -300,8 +359,7 @@ namespace HslCommunicationDemo
             // short写入
             try
             {
-                busTcpServer.Write( textBox8.Text, short.Parse( textBox7.Text ) );
-                writeResultRender( textBox8.Text );
+                DemoUtils.WriteResultRender( busTcpServer.Write( textBox8.Text, short.Parse( textBox7.Text ) ), textBox8.Text );
             }
             catch (Exception ex)
             {
@@ -314,8 +372,7 @@ namespace HslCommunicationDemo
             // ushort写入
             try
             {
-                busTcpServer.Write(textBox8.Text, ushort.Parse( textBox7.Text ) );
-                writeResultRender( textBox8.Text );
+                DemoUtils.WriteResultRender( busTcpServer.Write( textBox8.Text, ushort.Parse( textBox7.Text ) ), textBox8.Text );
             }
             catch (Exception ex)
             {
@@ -329,8 +386,7 @@ namespace HslCommunicationDemo
             // int写入
             try
             {
-                busTcpServer.Write( textBox8.Text, int.Parse( textBox7.Text ) );
-                writeResultRender( textBox8.Text );
+                DemoUtils.WriteResultRender( busTcpServer.Write( textBox8.Text, int.Parse( textBox7.Text ) ), textBox8.Text );
             }
             catch (Exception ex)
             {
@@ -343,8 +399,7 @@ namespace HslCommunicationDemo
             // uint写入
             try
             {
-                busTcpServer.Write( textBox8.Text , uint.Parse( textBox7.Text ) );
-                writeResultRender( textBox8.Text );
+                DemoUtils.WriteResultRender( busTcpServer.Write( textBox8.Text, uint.Parse( textBox7.Text ) ), textBox8.Text );
             }
             catch (Exception ex)
             {
@@ -357,8 +412,7 @@ namespace HslCommunicationDemo
             // long写入
             try
             {
-                busTcpServer.Write( textBox8.Text, long.Parse( textBox7.Text ) );
-                writeResultRender( textBox8.Text );
+                DemoUtils.WriteResultRender( busTcpServer.Write( textBox8.Text, long.Parse( textBox7.Text ) ), textBox8.Text );
             }
             catch (Exception ex)
             {
@@ -371,8 +425,7 @@ namespace HslCommunicationDemo
             // ulong写入
             try
             {
-                busTcpServer.Write(textBox8.Text , ulong.Parse( textBox7.Text ) );
-                writeResultRender( textBox8.Text );
+                DemoUtils.WriteResultRender( busTcpServer.Write( textBox8.Text, ulong.Parse( textBox7.Text ) ), textBox8.Text );
             }
             catch (Exception ex)
             {
@@ -385,8 +438,7 @@ namespace HslCommunicationDemo
             // float写入
             try
             {
-                busTcpServer.Write( textBox8.Text, float.Parse( textBox7.Text ) );
-                writeResultRender( textBox8.Text );
+                DemoUtils.WriteResultRender( busTcpServer.Write( textBox8.Text, float.Parse( textBox7.Text ) ), textBox8.Text );
             }
             catch (Exception ex)
             {
@@ -399,8 +451,7 @@ namespace HslCommunicationDemo
             // double写入
             try
             {
-                busTcpServer.Write( textBox8.Text, double.Parse( textBox7.Text ) );
-                writeResultRender( textBox8.Text );
+                DemoUtils.WriteResultRender( busTcpServer.Write( textBox8.Text, double.Parse( textBox7.Text ) ), textBox8.Text );
             }
             catch (Exception ex)
             {
@@ -414,8 +465,7 @@ namespace HslCommunicationDemo
             // string写入
             try
             {
-                busTcpServer.Write( textBox8.Text, textBox7.Text );
-                writeResultRender( textBox8.Text );
+                DemoUtils.WriteResultRender( busTcpServer.Write( textBox8.Text, textBox7.Text ), textBox8.Text );
             }
             catch (Exception ex)
             {
@@ -454,7 +504,7 @@ namespace HslCommunicationDemo
 
             textBox9.Text = after.ToString( );
 
-            label11.Text = "写入时间：" + DateTime.Now.ToString( ) + " 修改前：" + befor + " 修改后：" + after;
+            label11.Text = "w-time：" + DateTime.Now.ToString( ) + " before：" + befor + " after：" + after;
         }
 
         private void linkLabel2_LinkClicked( object sender, LinkLabelLinkClickedEventArgs e )
@@ -467,7 +517,7 @@ namespace HslCommunicationDemo
         {
             if (busTcpServer == null)
             {
-                MessageBox.Show( "必须先启动服务器！" );
+                MessageBox.Show( "Must Start Server！" );
                 return;
             }
             // 信任客户端配置
@@ -482,14 +532,14 @@ namespace HslCommunicationDemo
         {
             bool Coil100 = busTcpServer.ReadCoil( "100" );                  // 读线圈100的值
             bool[] Coil100_109 = busTcpServer.ReadCoil( "100", 10 );        // 读线圈数组
-            short Short100 = busTcpServer.ReadInt16( "100" );               // 读取寄存器值
-            ushort UShort100 = busTcpServer.ReadUInt16( "100" );            // 读取寄存器ushort值
-            int Int100 = busTcpServer.ReadInt32( "100" );                   // 读取寄存器int值
-            uint UInt100 = busTcpServer.ReadUInt32( "100" );                // 读取寄存器uint值
-            float Float100 = busTcpServer.ReadFloat( "100" );               // 读取寄存器Float值
-            long Long100 = busTcpServer.ReadInt64( "100" );                 // 读取寄存器long值
-            ulong ULong100 = busTcpServer.ReadUInt64( "100" );              // 读取寄存器ulong值
-            double Double100 = busTcpServer.ReadDouble( "100" );            // 读取寄存器double值
+            short Short100 = busTcpServer.ReadInt16( "100" ).Content;               // 读取寄存器值
+            ushort UShort100 = busTcpServer.ReadUInt16( "100" ).Content;            // 读取寄存器ushort值
+            int Int100 = busTcpServer.ReadInt32( "100" ).Content;                   // 读取寄存器int值
+            uint UInt100 = busTcpServer.ReadUInt32( "100" ).Content;                // 读取寄存器uint值
+            float Float100 = busTcpServer.ReadFloat( "100" ).Content;               // 读取寄存器Float值
+            long Long100 = busTcpServer.ReadInt64( "100" ).Content;                 // 读取寄存器long值
+            ulong ULong100 = busTcpServer.ReadUInt64( "100" ).Content;              // 读取寄存器ulong值
+            double Double100 = busTcpServer.ReadDouble( "100" ).Content;            // 读取寄存器double值
 
             busTcpServer.WriteCoil( "100", true );                          // 写线圈的通断
             busTcpServer.Write( "100", (short)5 );                          // 写入short值
@@ -512,11 +562,11 @@ namespace HslCommunicationDemo
                     OperateResult connect = busTcpServer.ConnectHslAlientClient( form.IpAddress, form.Port, form.DTU );
                     if (connect.IsSuccess)
                     {
-                        MessageBox.Show( "连接成功！" );
+                        MessageBox.Show( HslCommunication.StringResources.Language.ConnectedSuccess );
                     }
                     else
                     {
-                        MessageBox.Show( "连接失败！原因：" + connect.Message );
+                        MessageBox.Show( HslCommunication.StringResources.Language.ConnectedFailed + connect.Message );
                     }
                 }
             }
@@ -534,12 +584,12 @@ namespace HslCommunicationDemo
                 }
                 catch(Exception ex)
                 {
-                    MessageBox.Show( "串口服务器启动失败：" + ex.Message );
+                    MessageBox.Show( "Start Failed：" + ex.Message );
                 }
             }
             else
             {
-                MessageBox.Show( "请先启动Tcp服务器：" );
+                MessageBox.Show( "Start tcp server first please!" );
             }
         }
 
@@ -549,7 +599,7 @@ namespace HslCommunicationDemo
             if (busTcpServer != null)
             {
                 busTcpServer.SaveDataPool( "123.txt" );
-                MessageBox.Show( "存储完成" );
+                MessageBox.Show( "save finsh" );
             }
         }
 
@@ -561,11 +611,11 @@ namespace HslCommunicationDemo
                 if (System.IO.File.Exists( "123.txt" ))
                 {
                     busTcpServer.LoadDataPool( "123.txt" );
-                    MessageBox.Show( "加载完成" );
+                    MessageBox.Show( "load finish" );
                 }
                 else
                 {
-                    MessageBox.Show( "文件不存在！" );
+                    MessageBox.Show( "file not exist！" );
                 }
             }
         }
@@ -573,7 +623,7 @@ namespace HslCommunicationDemo
 
 
         private string timerAddress = string.Empty;
-        private ushort timerValue = 0;
+        private long timerValue = 0;
         private System.Windows.Forms.Timer timerWrite = null;
         private void button10_Click( object sender, EventArgs e )
         {
@@ -588,7 +638,8 @@ namespace HslCommunicationDemo
 
         private void TimerWrite_Tick( object sender, EventArgs e )
         {
-            busTcpServer.Write( timerAddress, timerValue );
+            ushort value = (ushort)(Math.Sin( 2 * Math.PI * timerValue / 100 ) * 100 + 100);
+            busTcpServer.Write( timerAddress, value );
             timerValue++;
         }
 

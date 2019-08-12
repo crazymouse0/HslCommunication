@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using HslCommunication.BasicFramework;
 
 namespace HslCommunication.Profinet.Melsec
 {
@@ -11,6 +12,7 @@ namespace HslCommunication.Profinet.Melsec
     /// 三菱PLC的计算机链接协议，适用的PLC型号参考备注
     /// </summary>
     /// <remarks>
+    /// 支持的通讯的系列如下参考
     /// <list type="table">
     ///     <listheader>
     ///         <term>系列</term>
@@ -97,6 +99,108 @@ namespace HslCommunication.Profinet.Melsec
     ///         <description>不支持</description>
     ///         <description></description>
     ///     </item>
+    /// </list>
+    /// 数据地址支持的格式如下：
+    /// <list type="table">
+    ///   <listheader>
+    ///     <term>地址名称</term>
+    ///     <term>地址代号</term>
+    ///     <term>示例</term>
+    ///     <term>地址进制</term>
+    ///     <term>字操作</term>
+    ///     <term>位操作</term>
+    ///     <term>备注</term>
+    ///   </listheader>
+    ///   <item>
+    ///     <term>内部继电器</term>
+    ///     <term>M</term>
+    ///     <term>M100,M200</term>
+    ///     <term>10</term>
+    ///     <term>√</term>
+    ///     <term>√</term>
+    ///     <term></term>
+    ///   </item>
+    ///   <item>
+    ///     <term>输入继电器</term>
+    ///     <term>X</term>
+    ///     <term>X10,X20</term>
+    ///     <term>8</term>
+    ///     <term>√</term>
+    ///     <term>√</term>
+    ///     <term></term>
+    ///   </item>
+    ///   <item>
+    ///     <term>输出继电器</term>
+    ///     <term>Y</term>
+    ///     <term>Y10,Y20</term>
+    ///     <term>8</term>
+    ///     <term>√</term>
+    ///     <term>√</term>
+    ///     <term></term>
+    ///   </item>
+    ///   <item>
+    ///     <term>步进继电器</term>
+    ///     <term>S</term>
+    ///     <term>S100,S200</term>
+    ///     <term>10</term>
+    ///     <term>√</term>
+    ///     <term>√</term>
+    ///     <term></term>
+    ///   </item>
+    ///   <item>
+    ///     <term>定时器的触点</term>
+    ///     <term>TS</term>
+    ///     <term>TS100,TS200</term>
+    ///     <term>10</term>
+    ///     <term>√</term>
+    ///     <term>√</term>
+    ///     <term></term>
+    ///   </item>
+    ///   <item>
+    ///     <term>定时器的当前值</term>
+    ///     <term>TN</term>
+    ///     <term>TN100,TN200</term>
+    ///     <term>10</term>
+    ///     <term>√</term>
+    ///     <term>×</term>
+    ///     <term></term>
+    ///   </item>
+    ///   <item>
+    ///     <term>计数器的触点</term>
+    ///     <term>CS</term>
+    ///     <term>CS100,CS200</term>
+    ///     <term>10</term>
+    ///     <term>√</term>
+    ///     <term>√</term>
+    ///     <term></term>
+    ///   </item>
+    ///   <item>
+    ///     <term>计数器的当前</term>
+    ///     <term>CN</term>
+    ///     <term>CN100,CN200</term>
+    ///     <term>10</term>
+    ///     <term>√</term>
+    ///     <term>×</term>
+    ///     <term></term>
+    ///   </item>
+    ///   <item>
+    ///     <term>数据寄存器</term>
+    ///     <term>D</term>
+    ///     <term>D1000,D2000</term>
+    ///     <term>10</term>
+    ///     <term>√</term>
+    ///     <term>×</term>
+    ///     <term></term>
+    ///   </item>
+    ///   <item>
+    ///     <term>文件寄存器</term>
+    ///     <term>R</term>
+    ///     <term>R100,R200</term>
+    ///     <term>10</term>
+    ///     <term>√</term>
+    ///     <term>×</term>
+    ///     <term></term>
+    ///   </item>
     /// </list>
     /// </remarks>
     public class MelsecFxLinks : SerialDeviceBase<RegularByteTransform>
@@ -210,7 +314,7 @@ namespace HslCommunication.Profinet.Melsec
         /// <param name="address">地址信息，比如X10,Y17，注意X，Y的地址是8进制的</param>
         /// <param name="length">读取的长度</param>
         /// <returns>读取结果信息</returns>
-        public OperateResult<bool[]> ReadBool( string address, ushort length )
+        public override OperateResult<bool[]> ReadBool( string address, ushort length )
         {
             // 解析指令
             OperateResult<byte[]> command = BuildReadCommand( this.station, address, length, true, sumCheck, watiingTime );
@@ -230,36 +334,12 @@ namespace HslCommunication.Profinet.Melsec
         }
 
         /// <summary>
-        /// 批量读取bool类型数据，支持的类型为X,Y,S,T,C，具体的地址范围取决于PLC的类型
-        /// </summary>
-        /// <param name="address">地址信息，比如X10,Y17，注意X，Y的地址是8进制的</param>
-        /// <returns>读取结果信息</returns>
-        public OperateResult<bool> ReadBool( string address )
-        {
-            OperateResult<bool[]> read = ReadBool( address, 1 );
-            if (!read.IsSuccess) return OperateResult.CreateFailedResult<bool>( read );
-
-            return OperateResult.CreateSuccessResult( read.Content[0] );
-        }
-
-        /// <summary>
-        /// 批量写入bool类型的数值，支持的类型为X,Y,S,T,C，具体的地址范围取决于PLC的类型
-        /// </summary>
-        /// <param name="address">PLC的地址信息</param>
-        /// <param name="value">数据信息</param>
-        /// <returns>是否写入成功</returns>
-        public OperateResult Write(string address, bool value )
-        {
-            return Write( address, new bool[] { value } );
-        }
-
-        /// <summary>
         /// 批量写入bool类型的数组，支持的类型为X,Y,S,T,C，具体的地址范围取决于PLC的类型
         /// </summary>
         /// <param name="address">PLC的地址信息</param>
         /// <param name="value">数据信息</param>
         /// <returns>是否写入成功</returns>
-        public OperateResult Write( string address, bool[] value )
+        public override OperateResult Write( string address, bool[] value )
         {
             // 解析指令
             OperateResult<byte[]> command = BuildWriteBoolCommand( this.station, address, value, sumCheck, watiingTime );
@@ -339,114 +419,89 @@ namespace HslCommunication.Profinet.Melsec
         /// 解析数据地址成不同的三菱地址类型
         /// </summary>
         /// <param name="address">数据地址</param>
-        /// <param name="isBool">是否是位读取</param>
         /// <returns>地址结果对象</returns>
-        private static OperateResult<string> FxAnalysisAddress( string address, bool isBool )
+        private static OperateResult<string> FxAnalysisAddress( string address )
         {
             var result = new OperateResult<string>( );
             try
             {
-                if (isBool)
+                switch (address[0])
                 {
-                    switch (address[0])
-                    {
-                        case 'X':
-                        case 'x':
-                            {
-                                ushort tmp = Convert.ToUInt16( address.Substring( 1 ), 8 );
-                                result.Content = "X" + Convert.ToUInt16( address.Substring( 1 ), 10 ).ToString( "D4" );
-                                break;
-                            }
-                        case 'Y':
-                        case 'y':
-                            {
-                                ushort tmp = Convert.ToUInt16( address.Substring( 1 ), 8 );
-                                result.Content = "Y" + Convert.ToUInt16( address.Substring( 1 ), 10 ).ToString( "D4" );
-                                break;
-                            }
-                        case 'M':
-                        case 'm':
-                            {
-                                result.Content = "M" + Convert.ToUInt16( address.Substring( 1 ), 10 ).ToString( "D4" );
-                                break;
-                            }
-                        case 'S':
-                        case 's':
-                            {
-                                result.Content = "S" + Convert.ToUInt16( address.Substring( 1 ), 10 ).ToString( "D4" );
-                                break;
-                            }
-                        case 'T':
-                        case 't':
+                    case 'X':
+                    case 'x':
+                        {
+                            ushort tmp = Convert.ToUInt16( address.Substring( 1 ), 8 );
+                            result.Content = "X" + Convert.ToUInt16( address.Substring( 1 ), 10 ).ToString( "D4" );
+                            break;
+                        }
+                    case 'Y':
+                    case 'y':
+                        {
+                            ushort tmp = Convert.ToUInt16( address.Substring( 1 ), 8 );
+                            result.Content = "Y" + Convert.ToUInt16( address.Substring( 1 ), 10 ).ToString( "D4" );
+                            break;
+                        }
+                    case 'M':
+                    case 'm':
+                        {
+                            result.Content = "M" + Convert.ToUInt16( address.Substring( 1 ), 10 ).ToString( "D4" );
+                            break;
+                        }
+                    case 'S':
+                    case 's':
+                        {
+                            result.Content = "S" + Convert.ToUInt16( address.Substring( 1 ), 10 ).ToString( "D4" );
+                            break;
+                        }
+                    case 'T':
+                    case 't':
+                        {
+                            if (address[1] == 'S' || address[1] == 's')
                             {
                                 result.Content = "TS" + Convert.ToUInt16( address.Substring( 1 ), 10 ).ToString( "D3" );
                                 break;
                             }
-                        case 'C':
-                        case 'c':
-                            {
-                                result.Content = "CS" + Convert.ToUInt16( address.Substring( 1 ), 10 ).ToString( "D3" );
-                                break;
-                            }
-                        default: throw new Exception( StringResources.Language.NotSupportedDataType );
-                    }
-                }
-                else
-                {
-                    switch (address[0])
-                    {
-                        case 'X':
-                        case 'x':
-                            {
-                                ushort tmp = Convert.ToUInt16( address.Substring( 1 ), 8 );
-                                result.Content = "X" + Convert.ToUInt16( address.Substring( 1 ), 10 ).ToString( "D4" );
-                                break;
-                            }
-                        case 'Y':
-                        case 'y':
-                            {
-                                ushort tmp = Convert.ToUInt16( address.Substring( 1 ), 8 );
-                                result.Content = "Y" + Convert.ToUInt16( address.Substring( 1 ), 10 ).ToString( "D4" );
-                                break;
-                            }
-                        case 'M':
-                        case 'm':
-                            {
-                                result.Content = "M" + Convert.ToUInt16( address.Substring( 1 ), 10 ).ToString( "D4" );
-                                break;
-                            }
-                        case 'S':
-                        case 's':
-                            {
-                                result.Content = "S" + Convert.ToUInt16( address.Substring( 1 ), 10 ).ToString( "D4" );
-                                break;
-                            }
-                        case 'T':
-                        case 't':
+                            else if (address[1] == 'N' || address[1] == 'n')
                             {
                                 result.Content = "TN" + Convert.ToUInt16( address.Substring( 1 ), 10 ).ToString( "D3" );
                                 break;
                             }
-                        case 'C':
-                        case 'c':
+                            else
+                            {
+                                throw new Exception( StringResources.Language.NotSupportedDataType );
+                            }
+                        }
+                    case 'C':
+                    case 'c':
+                        {
+                            if (address[1] == 'S' || address[1] == 's')
+                            {
+                                result.Content = "CS" + Convert.ToUInt16( address.Substring( 1 ), 10 ).ToString( "D3" );
+                                break;
+                            }
+                            else if (address[1] == 'N' || address[1] == 'n')
                             {
                                 result.Content = "CN" + Convert.ToUInt16( address.Substring( 1 ), 10 ).ToString( "D3" );
                                 break;
                             }
-                        case 'D':
-                        case 'd':
+                            else
                             {
-                                result.Content = "D" + Convert.ToUInt16( address.Substring( 1 ), 10 ).ToString( "D4" );
-                                break;
+                                throw new Exception( StringResources.Language.NotSupportedDataType );
                             }
-                        case 'R':
-                        case 'r':
-                            {
-                                result.Content = "R" + Convert.ToUInt16( address.Substring( 1 ), 10 ).ToString( "D4" );
-                                break;
-                            }
-                        default: throw new Exception( StringResources.Language.NotSupportedDataType );
-                    }
+                        }
+                    case 'D':
+                    case 'd':
+                        {
+                            result.Content = "D" + Convert.ToUInt16( address.Substring( 1 ), 10 ).ToString( "D4" );
+                            break;
+                        }
+                    case 'R':
+                    case 'r':
+                        {
+                            result.Content = "R" + Convert.ToUInt16( address.Substring( 1 ), 10 ).ToString( "D4" );
+                            break;
+                        }
+                    default: throw new Exception( StringResources.Language.NotSupportedDataType );
                 }
             }
             catch (Exception ex)
@@ -489,7 +544,7 @@ namespace HslCommunication.Profinet.Melsec
         /// <returns>是否成功的结果对象</returns>
         public static OperateResult<byte[]> BuildReadCommand( byte station, string address, ushort length, bool isBool, bool sumCheck = true, byte waitTime = 0x00 )
         {
-            OperateResult<string> addressAnalysis = FxAnalysisAddress( address, isBool );
+            OperateResult<string> addressAnalysis = FxAnalysisAddress( address );
             if (!addressAnalysis.IsSuccess) return OperateResult.CreateFailedResult<byte[]>( addressAnalysis );
 
             StringBuilder stringBuilder = new StringBuilder( );
@@ -527,7 +582,7 @@ namespace HslCommunication.Profinet.Melsec
         /// <returns>是否创建成功</returns>
         public static OperateResult<byte[]> BuildWriteBoolCommand( byte station, string address, bool[] value, bool sumCheck = true, byte waitTime = 0x00 )
         {
-            OperateResult<string> addressAnalysis = FxAnalysisAddress( address, true );
+            OperateResult<string> addressAnalysis = FxAnalysisAddress( address );
             if (!addressAnalysis.IsSuccess) return OperateResult.CreateFailedResult<byte[]>( addressAnalysis );
 
             StringBuilder stringBuilder = new StringBuilder( );
@@ -564,7 +619,7 @@ namespace HslCommunication.Profinet.Melsec
         /// <returns>是否创建成功</returns>
         public static OperateResult<byte[]> BuildWriteByteCommand( byte station, string address, byte[] value, bool sumCheck = true, byte waitTime = 0x00 )
         {
-            OperateResult<string> addressAnalysis = FxAnalysisAddress( address, false );
+            OperateResult<string> addressAnalysis = FxAnalysisAddress( address );
             if (!addressAnalysis.IsSuccess) return OperateResult.CreateFailedResult<byte[]>( addressAnalysis );
 
             StringBuilder stringBuilder = new StringBuilder( );
@@ -579,7 +634,7 @@ namespace HslCommunication.Profinet.Melsec
             byte[] buffer = new byte[value.Length * 2];
             for (int i = 0; i < value.Length / 2; i++)
             {
-                MelsecHelper.BuildBytesFromData( BitConverter.ToUInt16( value, i * 2 ) ).CopyTo( buffer, 4 * i );
+                SoftBasic.BuildAsciiBytesFrom( BitConverter.ToUInt16( value, i * 2 ) ).CopyTo( buffer, 4 * i );
             }
             stringBuilder.Append( Encoding.ASCII.GetString( buffer ) );
 

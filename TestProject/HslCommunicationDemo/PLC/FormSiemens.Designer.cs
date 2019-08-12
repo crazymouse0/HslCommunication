@@ -43,14 +43,7 @@
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.panel2 = new System.Windows.Forms.Panel();
-            this.groupBox5 = new System.Windows.Forms.GroupBox();
-            this.button27 = new System.Windows.Forms.Button();
-            this.textBox14 = new System.Windows.Forms.TextBox();
-            this.label18 = new System.Windows.Forms.Label();
-            this.label17 = new System.Windows.Forms.Label();
-            this.textBox12 = new System.Windows.Forms.TextBox();
-            this.label15 = new System.Windows.Forms.Label();
-            this.userCurve1 = new HslCommunication.Controls.UserCurve();
+            this.userControlCurve1 = new HslCommunicationDemo.DemoControl.UserControlCurve();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.textBox11 = new System.Windows.Forms.TextBox();
             this.label14 = new System.Windows.Forms.Label();
@@ -87,7 +80,6 @@
             this.textBox8 = new System.Windows.Forms.TextBox();
             this.label10 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.textBox5 = new System.Windows.Forms.TextBox();
             this.button_read_string = new System.Windows.Forms.Button();
             this.button_read_double = new System.Windows.Forms.Button();
             this.button_read_float = new System.Windows.Forms.Button();
@@ -103,15 +95,9 @@
             this.label7 = new System.Windows.Forms.Label();
             this.textBox3 = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
-            this.label8 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.linkLabel1 = new System.Windows.Forms.LinkLabel();
-            this.label4 = new System.Windows.Forms.Label();
-            this.label5 = new System.Windows.Forms.Label();
-            this.label20 = new System.Windows.Forms.Label();
+            this.userControlHead1 = new HslCommunicationDemo.DemoControl.UserControlHead();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
-            this.groupBox5.SuspendLayout();
             this.groupBox4.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -136,7 +122,7 @@
             this.panel1.Controls.Add(this.label3);
             this.panel1.Controls.Add(this.textBox1);
             this.panel1.Controls.Add(this.label1);
-            this.panel1.Location = new System.Drawing.Point(14, 32);
+            this.panel1.Location = new System.Drawing.Point(14, 39);
             this.panel1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(978, 54);
@@ -228,7 +214,6 @@
             // 
             this.textBox2.Location = new System.Drawing.Point(238, 14);
             this.textBox2.Name = "textBox2";
-            this.textBox2.ReadOnly = true;
             this.textBox2.Size = new System.Drawing.Size(61, 23);
             this.textBox2.TabIndex = 3;
             this.textBox2.Text = "102";
@@ -265,98 +250,25 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panel2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panel2.Controls.Add(this.groupBox5);
+            this.panel2.Controls.Add(this.userControlCurve1);
             this.panel2.Controls.Add(this.groupBox4);
             this.panel2.Controls.Add(this.groupBox3);
             this.panel2.Controls.Add(this.groupBox2);
             this.panel2.Controls.Add(this.groupBox1);
-            this.panel2.Location = new System.Drawing.Point(14, 95);
+            this.panel2.Location = new System.Drawing.Point(14, 99);
             this.panel2.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(978, 537);
             this.panel2.TabIndex = 1;
             // 
-            // groupBox5
+            // userControlCurve1
             // 
-            this.groupBox5.Controls.Add(this.button27);
-            this.groupBox5.Controls.Add(this.textBox14);
-            this.groupBox5.Controls.Add(this.label18);
-            this.groupBox5.Controls.Add(this.label17);
-            this.groupBox5.Controls.Add(this.textBox12);
-            this.groupBox5.Controls.Add(this.label15);
-            this.groupBox5.Controls.Add(this.userCurve1);
-            this.groupBox5.Location = new System.Drawing.Point(546, 243);
-            this.groupBox5.Name = "groupBox5";
-            this.groupBox5.Size = new System.Drawing.Size(419, 278);
-            this.groupBox5.TabIndex = 4;
-            this.groupBox5.TabStop = false;
-            this.groupBox5.Text = "定时读取，曲线显示";
-            // 
-            // button27
-            // 
-            this.button27.Location = new System.Drawing.Point(343, 25);
-            this.button27.Name = "button27";
-            this.button27.Size = new System.Drawing.Size(70, 28);
-            this.button27.TabIndex = 9;
-            this.button27.Text = "启动";
-            this.button27.UseVisualStyleBackColor = true;
-            this.button27.Click += new System.EventHandler(this.button27_Click);
-            // 
-            // textBox14
-            // 
-            this.textBox14.Location = new System.Drawing.Point(255, 28);
-            this.textBox14.Name = "textBox14";
-            this.textBox14.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox14.Size = new System.Drawing.Size(82, 23);
-            this.textBox14.TabIndex = 8;
-            this.textBox14.Text = "300";
-            // 
-            // label18
-            // 
-            this.label18.AutoSize = true;
-            this.label18.Location = new System.Drawing.Point(212, 30);
-            this.label18.Name = "label18";
-            this.label18.Size = new System.Drawing.Size(44, 17);
-            this.label18.TabIndex = 7;
-            this.label18.Text = "间隔：";
-            // 
-            // label17
-            // 
-            this.label17.AutoSize = true;
-            this.label17.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
-            this.label17.Location = new System.Drawing.Point(60, 53);
-            this.label17.Name = "label17";
-            this.label17.Size = new System.Drawing.Size(218, 17);
-            this.label17.TabIndex = 6;
-            this.label17.Text = "此处假设确定了数据的类型，为short：";
-            // 
-            // textBox12
-            // 
-            this.textBox12.Location = new System.Drawing.Point(64, 27);
-            this.textBox12.Name = "textBox12";
-            this.textBox12.Size = new System.Drawing.Size(132, 23);
-            this.textBox12.TabIndex = 5;
-            this.textBox12.Text = "M100";
-            // 
-            // label15
-            // 
-            this.label15.AutoSize = true;
-            this.label15.Location = new System.Drawing.Point(10, 30);
-            this.label15.Name = "label15";
-            this.label15.Size = new System.Drawing.Size(44, 17);
-            this.label15.TabIndex = 4;
-            this.label15.Text = "地址：";
-            // 
-            // userCurve1
-            // 
-            this.userCurve1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(32)))), ((int)(((byte)(32)))));
-            this.userCurve1.Location = new System.Drawing.Point(13, 82);
-            this.userCurve1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.userCurve1.Name = "userCurve1";
-            this.userCurve1.Size = new System.Drawing.Size(400, 189);
-            this.userCurve1.TabIndex = 0;
-            this.userCurve1.ValueMaxLeft = 200F;
-            this.userCurve1.ValueMaxRight = 200F;
+            this.userControlCurve1.AddressExample = "M100";
+            this.userControlCurve1.Location = new System.Drawing.Point(545, 243);
+            this.userControlCurve1.Name = "userControlCurve1";
+            this.userControlCurve1.ReadWriteNet = null;
+            this.userControlCurve1.Size = new System.Drawing.Size(420, 279);
+            this.userControlCurve1.TabIndex = 4;
             // 
             // groupBox4
             // 
@@ -719,7 +631,6 @@
             // 
             // groupBox1
             // 
-            this.groupBox1.Controls.Add(this.textBox5);
             this.groupBox1.Controls.Add(this.button_read_string);
             this.groupBox1.Controls.Add(this.button_read_double);
             this.groupBox1.Controls.Add(this.button_read_float);
@@ -735,21 +646,12 @@
             this.groupBox1.Controls.Add(this.label7);
             this.groupBox1.Controls.Add(this.textBox3);
             this.groupBox1.Controls.Add(this.label6);
-            this.groupBox1.Controls.Add(this.label8);
             this.groupBox1.Location = new System.Drawing.Point(11, 3);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(518, 234);
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "单数据读取测试";
-            // 
-            // textBox5
-            // 
-            this.textBox5.Location = new System.Drawing.Point(358, 195);
-            this.textBox5.Name = "textBox5";
-            this.textBox5.Size = new System.Drawing.Size(41, 23);
-            this.textBox5.TabIndex = 17;
-            this.textBox5.Text = "10";
             // 
             // button_read_string
             // 
@@ -896,74 +798,26 @@
             this.label6.TabIndex = 2;
             this.label6.Text = "地址：";
             // 
-            // label8
+            // userControlHead1
             // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(315, 198);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(44, 17);
-            this.label8.TabIndex = 18;
-            this.label8.Text = "长度：";
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(11, 9);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(68, 17);
-            this.label2.TabIndex = 2;
-            this.label2.Text = "博客地址：";
-            // 
-            // linkLabel1
-            // 
-            this.linkLabel1.AutoSize = true;
-            this.linkLabel1.Location = new System.Drawing.Point(74, 9);
-            this.linkLabel1.Name = "linkLabel1";
-            this.linkLabel1.Size = new System.Drawing.Size(287, 17);
-            this.linkLabel1.TabIndex = 3;
-            this.linkLabel1.TabStop = true;
-            this.linkLabel1.Text = "http://www.cnblogs.com/dathlin/p/8685855.html";
-            this.linkLabel1.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel1_LinkClicked);
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(466, 9);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(68, 17);
-            this.label4.TabIndex = 4;
-            this.label4.Text = "使用协议：";
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.ForeColor = System.Drawing.Color.Red;
-            this.label5.Location = new System.Drawing.Point(540, 9);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(82, 17);
-            this.label5.TabIndex = 5;
-            this.label5.Text = "西门子S7协议";
-            // 
-            // label20
-            // 
-            this.label20.AutoSize = true;
-            this.label20.ForeColor = System.Drawing.Color.Green;
-            this.label20.Location = new System.Drawing.Point(887, 9);
-            this.label20.Name = "label20";
-            this.label20.Size = new System.Drawing.Size(108, 17);
-            this.label20.TabIndex = 6;
-            this.label20.Text = "作者：Richard Hu";
+            this.userControlHead1.BackColor = System.Drawing.Color.MediumPurple;
+            this.userControlHead1.Dock = System.Windows.Forms.DockStyle.Top;
+            this.userControlHead1.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.userControlHead1.HelpLink = "http://www.cnblogs.com/dathlin/p/8685855.html";
+            this.userControlHead1.Location = new System.Drawing.Point(0, 0);
+            this.userControlHead1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.userControlHead1.MinimumSize = new System.Drawing.Size(800, 32);
+            this.userControlHead1.Name = "userControlHead1";
+            this.userControlHead1.ProtocolInfo = "s7";
+            this.userControlHead1.Size = new System.Drawing.Size(1004, 32);
+            this.userControlHead1.TabIndex = 2;
             // 
             // FormSiemens
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 17F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1004, 645);
-            this.Controls.Add(this.label20);
-            this.Controls.Add(this.label5);
-            this.Controls.Add(this.label4);
-            this.Controls.Add(this.linkLabel1);
-            this.Controls.Add(this.label2);
+            this.Controls.Add(this.userControlHead1);
             this.Controls.Add(this.panel2);
             this.Controls.Add(this.panel1);
             this.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
@@ -976,8 +830,6 @@
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             this.panel2.ResumeLayout(false);
-            this.groupBox5.ResumeLayout(false);
-            this.groupBox5.PerformLayout();
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
             this.groupBox3.ResumeLayout(false);
@@ -987,7 +839,6 @@
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -996,23 +847,11 @@
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Panel panel2;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.LinkLabel linkLabel1;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.TextBox textBox2;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox textBox1;
-        private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.GroupBox groupBox5;
-        private System.Windows.Forms.Button button27;
-        private System.Windows.Forms.TextBox textBox14;
-        private System.Windows.Forms.Label label18;
-        private System.Windows.Forms.Label label17;
-        private System.Windows.Forms.TextBox textBox12;
-        private System.Windows.Forms.Label label15;
-        private HslCommunication.Controls.UserCurve userCurve1;
         private System.Windows.Forms.GroupBox groupBox4;
         private System.Windows.Forms.TextBox textBox11;
         private System.Windows.Forms.Label label14;
@@ -1043,7 +882,6 @@
         private System.Windows.Forms.TextBox textBox8;
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.TextBox textBox5;
         private System.Windows.Forms.Button button_read_string;
         private System.Windows.Forms.Button button_read_double;
         private System.Windows.Forms.Button button_read_float;
@@ -1058,9 +896,7 @@
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.TextBox textBox3;
         private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Label label19;
-        private System.Windows.Forms.Label label20;
         private System.Windows.Forms.Label label22;
         private System.Windows.Forms.Label label21;
         private System.Windows.Forms.Button button23;
@@ -1074,5 +910,7 @@
         private System.Windows.Forms.Button button6;
         private System.Windows.Forms.Button button5;
         private System.Windows.Forms.Button button4;
+        private DemoControl.UserControlCurve userControlCurve1;
+        private DemoControl.UserControlHead userControlHead1;
     }
 }

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using HslCommunication.Core;
+using System.Net;
 
 
 
@@ -40,91 +41,89 @@ namespace HslCommunication.Enthernet
         /// </summary>
         public NetPushServer()
         {
-            dictPushClients = new Dictionary<string, PushGroupClient>( );
-            dictSendHistory = new Dictionary<string, string>( );
-            dicHybirdLock = new SimpleHybirdLock( );
-            dicSendCacheLock = new SimpleHybirdLock( );
-            sendAction = new Action<AppSession, string>( SendString );
+            dictPushClients        = new Dictionary<string, PushGroupClient>( );
+            dictSendHistory        = new Dictionary<string, string>( );
+            dicHybirdLock          = new SimpleHybirdLock( );
+            dicSendCacheLock       = new SimpleHybirdLock( );
+            sendAction             = new Action<AppSession, string>( SendString );
 
-            hybirdLock = new SimpleHybirdLock( );
-            pushClients = new List<NetPushClient>( );
+            hybirdLock             = new SimpleHybirdLock( );
+            pushClients            = new List<NetPushClient>( );
         }
 
 
         #endregion
-        
+
         #region Server Override
 
         /// <summary>
-        /// 处理请求接收连接后的方法
+        /// 当接收到了新的请求的时候执行的操作
         /// </summary>
-        /// <param name="obj">Accpt对象</param>
-        protected override void ThreadPoolLogin( object obj )
+        /// <param name="socket">异步对象</param>
+        /// <param name="endPoint">终结点</param>
+        protected override void ThreadPoolLogin( Socket socket, IPEndPoint endPoint )
         {
-            if (obj is Socket socket)
+            // 接收一条信息，指定当前请求的数据订阅信息的关键字
+            OperateResult<int, string> receive = ReceiveStringContentFromSocket( socket );
+            if (!receive.IsSuccess) return;
+
+            // 判断当前的关键字在服务器是否有消息发布
+            //if(!IsPushGroupOnline(receive.Content2))
+            //{
+            //    SendStringAndCheckReceive( socket, 1, StringResources.Language.KeyIsNotExist );
+            //    LogNet?.WriteWarn( ToString( ), StringResources.Language.KeyIsNotExist );
+            //    socket?.Close( );
+            //    return;
+            //}
+
+            // 确认订阅的信息
+            OperateResult check = SendStringAndCheckReceive( socket, 0, "" );
+            if (!check.IsSuccess)
             {
-                // 接收一条信息，指定当前请求的数据订阅信息的关键字
-                OperateResult<int, string> receive = ReceiveStringContentFromSocket( socket );
-                if (!receive.IsSuccess) return;
+                socket?.Close( );
+                return;
+            }
 
-                // 判断当前的关键字在服务器是否有消息发布
-                //if(!IsPushGroupOnline(receive.Content2))
-                //{
-                //    SendStringAndCheckReceive( socket, 1, StringResources.Language.KeyIsNotExist );
-                //    LogNet?.WriteWarn( ToString( ), StringResources.Language.KeyIsNotExist );
-                //    socket?.Close( );
-                //    return;
-                //}
+            // 允许发布订阅信息
+            AppSession session = new AppSession
+            {
+                KeyGroup = receive.Content2,
+                WorkSocket = socket
+            };
 
-                // 确认订阅的信息
-                OperateResult check = SendStringAndCheckReceive( socket, 0, "" );
-                if (!check.IsSuccess)
+            try
+            {
+                session.IpEndPoint = (System.Net.IPEndPoint)socket.RemoteEndPoint;
+                session.IpAddress = session.IpEndPoint.Address.ToString( );
+            }
+            catch (Exception ex)
+            {
+                LogNet?.WriteException( ToString( ), StringResources.Language.GetClientIpaddressFailed, ex );
+            }
+
+            try
+            {
+                socket.BeginReceive( session.BytesHead, 0, session.BytesHead.Length, SocketFlags.None, new AsyncCallback( ReceiveCallback ), session );
+            }
+            catch (Exception ex)
+            {
+                LogNet?.WriteException( ToString( ), StringResources.Language.SocketReceiveException, ex );
+                return;
+            }
+
+            LogNet?.WriteDebug( ToString( ), string.Format( StringResources.Language.ClientOnlineInfo, session.IpEndPoint ) );
+            PushGroupClient push = GetPushGroupClient( receive.Content2 );
+            if (push != null)
+            {
+                System.Threading.Interlocked.Increment( ref onlineCount );
+                push.AddPushClient( session );
+
+                dicSendCacheLock.Enter( );
+                if (dictSendHistory.ContainsKey( receive.Content2 ))
                 {
-                    socket?.Close( );
-                    return;
+                    if (isPushCacheAfterConnect) SendString( session, dictSendHistory[receive.Content2] );
                 }
-
-                // 允许发布订阅信息
-                AppSession session = new AppSession
-                {
-                    KeyGroup = receive.Content2,
-                    WorkSocket = socket
-                };
-
-                try
-                {
-                    session.IpEndPoint = (System.Net.IPEndPoint)socket.RemoteEndPoint;
-                    session.IpAddress = session.IpEndPoint.Address.ToString( );
-                }
-                catch (Exception ex)
-                {
-                    LogNet?.WriteException( ToString( ), StringResources.Language.GetClientIpaddressFailed, ex );
-                }
-
-                try
-                {
-                    socket.BeginReceive( session.BytesHead, 0, session.BytesHead.Length, SocketFlags.None, new AsyncCallback( ReceiveCallback ), session );
-                }
-                catch(Exception ex)
-                {
-                    LogNet?.WriteException( ToString( ), StringResources.Language.SocketReceiveException, ex );
-                    return;
-                }
-
-                LogNet?.WriteDebug( ToString( ), string.Format( StringResources.Language.ClientOnlineInfo, session.IpEndPoint ) );
-                PushGroupClient push = GetPushGroupClient( receive.Content2 );
-                if (push != null)
-                {
-                    System.Threading.Interlocked.Increment( ref onlineCount );
-                    push.AddPushClient( session );
-
-                    dicSendCacheLock.Enter( );
-                    if(dictSendHistory.ContainsKey( receive.Content2 ))
-                    {
-                        if(isPushCacheAfterConnect) SendString( session, dictSendHistory[receive.Content2] );
-                    }
-                    dicSendCacheLock.Leave( );
-                }
+                dicSendCacheLock.Leave( );
             }
         }
 
@@ -341,16 +340,108 @@ namespace HslCommunication.Enthernet
         }
 
 
-        private void SendString(AppSession appSession,string content)
+        private void SendString(AppSession appSession, string content)
         {
-            OperateResult result = Send( appSession.WorkSocket, HslProtocol.CommandBytes( 0, Token, content ) );
-            // OperateResult result = SendStringAndCheckReceive( appSession.WorkSocket, 0, content );
-            if(!result.IsSuccess)
+            System.Threading.ThreadPool.QueueUserWorkItem(new System.Threading.WaitCallback(m =>
             {
-                RemoveGroupOnlien( appSession.KeyGroup, appSession.ClientUniqueID );
+                PushSendAsync(appSession, HslProtocol.CommandBytes(0, Token, content));
+            }), null);
+        }
+
+
+        #region Send Bytes Async
+
+        /// <summary>
+        /// 发送数据的方法
+        /// </summary>
+        /// <param name="session">通信用的核心对象</param>
+        /// <param name="content">完整的字节信息</param>
+        internal void PushSendAsync( AppSession session, byte[] content )
+        {
+            try
+            {
+                // 进入发送数据的锁，然后开启异步的数据发送
+                session.HybirdLockSend.Enter( );
+
+                // 启用另外一个网络封装对象进行发送数据
+                AsyncStateSend state = new AsyncStateSend( )
+                {
+                    WorkSocket          = session.WorkSocket,
+                    Content             = content,
+                    AlreadySendLength   = 0,
+                    HybirdLockSend      = session.HybirdLockSend,
+                    Key                 = session.KeyGroup,
+                    ClientId            = session.ClientUniqueID,
+                };
+
+                state.WorkSocket.BeginSend(
+                    state.Content,
+                    state.AlreadySendLength,
+                    state.Content.Length - state.AlreadySendLength,
+                    SocketFlags.None,
+                    new AsyncCallback( PushSendCallBack ),
+                    state );
+            }
+            catch (ObjectDisposedException)
+            {
+                // 不操作
+                session.HybirdLockSend.Leave( );
+                RemoveGroupOnlien( session.KeyGroup, session.ClientUniqueID );
+            }
+            catch (Exception ex)
+            {
+                session.HybirdLockSend.Leave( );
+                if (!ex.Message.Contains( StringResources.Language.SocketRemoteCloseException ))
+                {
+                    LogNet?.WriteException( ToString( ), StringResources.Language.SocketSendException, ex );
+                }
+                RemoveGroupOnlien( session.KeyGroup, session.ClientUniqueID );
             }
         }
 
+        /// <summary>
+        /// 发送回发方法
+        /// </summary>
+        /// <param name="ar">异步数据</param>
+        internal void PushSendCallBack( IAsyncResult ar )
+        {
+            if (ar.AsyncState is AsyncStateSend stateone)
+            {
+                try
+                {
+                    stateone.AlreadySendLength += stateone.WorkSocket.EndSend( ar );
+                    if (stateone.AlreadySendLength < stateone.Content.Length)
+                    {
+                        // 继续发送
+                        stateone.WorkSocket.BeginSend( stateone.Content,
+                        stateone.AlreadySendLength,
+                        stateone.Content.Length - stateone.AlreadySendLength,
+                        SocketFlags.None,
+                        new AsyncCallback( PushSendCallBack ),
+                        stateone );
+                    }
+                    else
+                    {
+                        stateone.HybirdLockSend.Leave( );
+                        // 发送完成
+                        stateone = null;
+                    }
+                }
+                catch (ObjectDisposedException)
+                {
+                    stateone.HybirdLockSend.Leave( );
+                    RemoveGroupOnlien( stateone.Key, stateone.ClientId );
+                }
+                catch (Exception ex)
+                {
+                    LogNet?.WriteException( ToString( ), StringResources.Language.SocketEndSendException, ex );
+                    stateone.HybirdLockSend.Leave( );
+                    RemoveGroupOnlien( stateone.Key, stateone.ClientId );
+                }
+            }
+        }
+
+        #endregion
 
 
         private void GetPushFromServer( NetPushClient pushClient, string data )

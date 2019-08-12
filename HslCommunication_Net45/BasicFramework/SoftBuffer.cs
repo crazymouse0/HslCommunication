@@ -17,7 +17,7 @@ namespace HslCommunication.BasicFramework
     /// 此处举例一些数据的读写说明，可以此处的数据示例。
     /// <code lang="cs" source="HslCommunication_Net45.Test\Documentation\Samples\BasicFramework\SoftBufferExample.cs" region="SoftBufferExample1" title="SoftBuffer示例" />
     /// </example>
-    public class SoftBuffer
+    public class SoftBuffer : IDisposable
     {
         #region Constructor
 
@@ -42,6 +42,136 @@ namespace HslCommunication.BasicFramework
             hybirdLock = new SimpleHybirdLock( );
             byteTransform = new RegularByteTransform( );
         }
+
+        #endregion
+
+        #region Bool Operate Support
+
+        /// <summary>
+        /// 设置指定的位置的数据块，如果超出，则丢弃数据
+        /// </summary>
+        /// <param name="value">bool值</param>
+        /// <param name="destIndex">目标存储的索引</param>
+        /// <exception cref="IndexOutOfRangeException"></exception>
+        public void SetBool( bool value, int destIndex )
+        {
+            SetBool( new bool[] { value }, destIndex );
+        }
+
+        /// <summary>
+        /// 设置指定的位置的数据块，如果超出，则丢弃数据
+        /// </summary>
+        /// <param name="value">bool数组值</param>
+        /// <param name="destIndex">目标存储的索引</param>
+        /// <exception cref="IndexOutOfRangeException"></exception>
+        public void SetBool( bool[] value, int destIndex )
+        {
+            if (value != null)
+            {
+                try
+                {
+                    hybirdLock.Enter( );
+                    for (int i = 0; i < value.Length; i++)
+                    {
+                        int byteIndex = (destIndex + i) / 8;
+                        int offect = (destIndex + i) % 8;
+
+                        if (value[i])
+                        {
+                            buffer[byteIndex] = (byte)(buffer[byteIndex] | getOrByte( offect ));
+                        }
+                        else
+                        {
+                            buffer[byteIndex] = (byte)(buffer[byteIndex] & getAndByte( offect ));
+                        }
+                    }
+
+                    hybirdLock.Leave( );
+                }
+                catch
+                {
+                    hybirdLock.Leave( );
+                    throw;
+                }
+            }
+
+        }
+
+        /// <summary>
+        /// 获取指定的位置的bool值，如果超出，则引发异常
+        /// </summary>
+        /// <param name="destIndex">目标存储的索引</param>
+        /// <returns>获取索引位置的bool数据值</returns>
+        /// <exception cref="IndexOutOfRangeException"></exception>
+        public bool GetBool( int destIndex )
+        {
+            return GetBool( destIndex, 1 )[0];
+        }
+
+        /// <summary>
+        /// 获取指定位置的bool数组值，如果超过，则引发异常
+        /// </summary>
+        /// <param name="destIndex">目标存储的索引</param>
+        /// <param name="length">读取的数组长度</param>
+        /// <exception cref="IndexOutOfRangeException"></exception>
+        /// <returns>bool数组值</returns>
+        public bool[] GetBool( int destIndex, int length )
+        {
+            bool[] result = new bool[length];
+            try
+            {
+                hybirdLock.Enter( );
+                for (int i = 0; i < length; i++)
+                {
+                    int byteIndex = (destIndex + i) / 8;
+                    int offect = (destIndex + i) % 8;
+
+                    result[i] = (buffer[byteIndex] & getOrByte( offect )) == getOrByte( offect );
+                }
+
+                hybirdLock.Leave( );
+            }
+            catch
+            {
+                hybirdLock.Leave( );
+                throw;
+            }
+            return result;
+        }
+
+        private byte getAndByte(int offect )
+        {
+            switch (offect)
+            {
+                case 0: return 0xFE;
+                case 1: return 0xFD;
+                case 2: return 0xFB;
+                case 3: return 0xF7;
+                case 4: return 0xEF;
+                case 5: return 0xDF;
+                case 6: return 0xBF;
+                case 7: return 0x7F;
+                default: return 0xFF;
+            }
+        }
+
+
+        private byte getOrByte( int offect )
+        {
+            switch (offect)
+            {
+                case 0: return 0x01;
+                case 1: return 0x02;
+                case 2: return 0x04;
+                case 3: return 0x08;
+                case 4: return 0x10;
+                case 5: return 0x20;
+                case 6: return 0x40;
+                case 7: return 0x80;
+                default: return 0x00;
+            }
+        }
+        
 
         #endregion
 
@@ -70,7 +200,7 @@ namespace HslCommunication.BasicFramework
                 hybirdLock.Leave( );
             }
         }
-        
+
         /// <summary>
         /// 设置指定的位置的数据块，如果超出，则丢弃数据
         /// </summary>
@@ -161,7 +291,7 @@ namespace HslCommunication.BasicFramework
         /// <param name="index">索引位置</param>
         public void SetValue(byte value, int index )
         {
-            SetBytes( new byte[value], index );
+            SetBytes( new byte[] { value }, index );
         }
  
         /// <summary>
@@ -511,7 +641,7 @@ namespace HslCommunication.BasicFramework
         /// <returns>double数据</returns>
         public double GetDouble( int index )
         {
-            return GetUInt64( index, 1 )[0];
+            return GetDouble( index, 1 )[0];
         }
 
         #endregion
@@ -566,5 +696,53 @@ namespace HslCommunication.BasicFramework
         private IByteTransform byteTransform;           // 数据转换类
 
         #endregion
+
+        #region IDisposable Support
+
+        private bool disposedValue = false; // 要检测冗余调用
+
+        /// <summary>
+        /// 释放当前的对象
+        /// </summary>
+        /// <param name="disposing"></param>
+        protected virtual void Dispose( bool disposing )
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: 释放托管状态(托管对象)。
+                    hybirdLock?.Dispose( );
+                    buffer = null;
+                }
+
+                // TODO: 释放未托管的资源(未托管的对象)并在以下内容中替代终结器。
+                // TODO: 将大型字段设置为 null。
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: 仅当以上 Dispose(bool disposing) 拥有用于释放未托管资源的代码时才替代终结器。
+        // ~SoftBuffer()
+        // {
+        //   // 请勿更改此代码。将清理代码放入以上 Dispose(bool disposing) 中。
+        //   Dispose(false);
+        // }
+
+        // 添加此代码以正确实现可处置模式。
+
+        /// <summary>
+        /// 释放当前的对象
+        /// </summary>
+        public void Dispose( )
+        {
+            // 请勿更改此代码。将清理代码放入以上 Dispose(bool disposing) 中。
+            Dispose( true );
+            // TODO: 如果在以上内容中替代了终结器，则取消注释以下行。
+            // GC.SuppressFinalize(this);
+        }
+        #endregion
+
     }
 }

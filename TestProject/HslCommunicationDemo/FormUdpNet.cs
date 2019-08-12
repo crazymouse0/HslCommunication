@@ -23,13 +23,6 @@ namespace HslCommunicationDemo
             panel2.Enabled = false;
             textBox3.Text = Guid.Empty.ToString( );
 
-
-            if (!Program.ShowAuthorInfomation)
-            {
-                label2.Visible = false;
-                linkLabel1.Visible = false;
-                label20.Visible = false;
-            }
         }
 
 
@@ -73,7 +66,15 @@ namespace HslCommunicationDemo
             DateTime start = DateTime.Now;
             for (int i = 0; i < count; i++)
             {
-                udpClient.SendMessage( handle, textBox4.Text );
+                OperateResult<string> read = udpClient.ReadFromServer( handle, textBox4.Text );
+                if (read.IsSuccess)
+                {
+                    textBox8.AppendText( read.Content + Environment.NewLine );
+                }
+                else
+                {
+                    textBox8.AppendText( "Read Failed：" + read.Message + Environment.NewLine );
+                }
             }
             
 
@@ -83,18 +84,6 @@ namespace HslCommunicationDemo
         {
             // 清空
             textBox4.Clear( );
-        }
-
-        private void linkLabel1_LinkClicked( object sender, LinkLabelLinkClickedEventArgs e )
-        {
-            try
-            {
-                System.Diagnostics.Process.Start( linkLabel1.Text );
-            }
-            catch (Exception ex)
-            {
-                HslCommunication.BasicFramework.SoftBasic.ShowExceptionMessage( ex );
-            }
         }
     }
 }

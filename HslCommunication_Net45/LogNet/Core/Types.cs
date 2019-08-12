@@ -23,6 +23,20 @@ namespace HslCommunication.LogNet
 
     }
 
+    /// <summary>
+    /// 日志存储回调的异常信息
+    /// </summary>
+    public class LogNetException : Exception
+    {
+        /// <summary>
+        /// 使用其他的异常信息来初始化日志异常
+        /// </summary>
+        /// <param name="innerException">异常信息</param>
+        public LogNetException( Exception innerException ) : base( innerException.Message, innerException )
+        {
+
+        }
+    }
 
     #endregion
 
@@ -106,13 +120,13 @@ namespace HslCommunication.LogNet
     {
         private static long IdNumber = 0;
 
-
         /// <summary>
         /// 默认的无参构造器
         /// </summary>
         public HslMessageItem( )
         {
-            Id = Interlocked.Increment( ref IdNumber );
+            Id    = Interlocked.Increment( ref IdNumber );
+            Time  = DateTime.Now;
         }
 
         /// <summary>
@@ -156,13 +170,20 @@ namespace HslCommunication.LogNet
         /// <returns>字符串信息</returns>
         public override string ToString( )
         {
-            if (string.IsNullOrEmpty( KeyWord ))
+            if (Degree != HslMessageDegree.None)
             {
-                return $"[{Degree}] {Time.ToString( "yyyy-MM-dd HH:mm:ss.fff" )} Thread [{ThreadId.ToString( "D3" )}] {Text}";
+                if (string.IsNullOrEmpty( KeyWord ))
+                {
+                    return $"[{Degree}] {Time.ToString( "yyyy-MM-dd HH:mm:ss.fff" )} Thread [{ThreadId.ToString( "D3" )}] {Text}";
+                }
+                else
+                {
+                    return $"[{Degree}] {Time.ToString( "yyyy-MM-dd HH:mm:ss.fff" )} Thread [{ThreadId.ToString( "D3" )}] {KeyWord} : {Text}";
+                }
             }
             else
             {
-                return $"[{Degree}] {Time.ToString( "yyyy-MM-dd HH:mm:ss.fff" )} Thread [{ThreadId.ToString( "D3" )}] {KeyWord} : {Text}";
+                return Text;
             }
         }
 
@@ -172,10 +193,17 @@ namespace HslCommunication.LogNet
         /// <returns>字符串信息</returns>
         public string ToStringWithoutKeyword( )
         {
-            return $"[{Degree}] {Time.ToString( "yyyy-MM-dd HH:mm:ss.fff" )} Thread [{ThreadId.ToString( "D3" )}] {Text}";
+            if (Degree != HslMessageDegree.None)
+            {
+                return $"[{Degree}] {Time.ToString( "yyyy-MM-dd HH:mm:ss.fff" )} Thread [{ThreadId.ToString( "D3" )}] {Text}";
+            }
+            else
+            {
+                return Text;
+            }
         }
     }
 
     #endregion
-    
+
 }

@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("HslCommunication")]
-[assembly: AssemblyCopyright("Copyright © By Richard.Hu 2018")]
+[assembly: AssemblyCopyright( "Copyright © By Richard.Hu 2017-2019" )]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 //通过使用 "*"，如下所示:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion( "5.7.4.0" )]
-[assembly: AssemblyFileVersion( "5.7.4.0" )]
+[assembly: AssemblyVersion( "7.0.1.0" )]
+[assembly: AssemblyFileVersion( "7.0.1.0" )]

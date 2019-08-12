@@ -1,7 +1,7 @@
 '''
 MIT License
 
-Copyright (c) 2017-2018 Richard.Hu
+Copyright (c) 2017-2019 Richard.Hu
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -33,10 +33,10 @@ if __name__ == "__main__":
     # netSimplifyClient.Token = uuid.UUID('66a469ad-a595-48ed-abe1-912f7085dbcd')
     netSimplifyClient.ConnectServer()
 
-    read = netSimplifyClient.ReadStringFromServer(1,'123')
+    read = netSimplifyClient.ReadFromServer(1,'123')
     if read.IsSuccess:
         print(read.Content)
     else:
         print(read.Message)
-    read = netSimplifyClient.ReadStringFromServer(1,'测试信号')
+    read = netSimplifyClient.ReadFromServer(1,'测试信号')
     netSimplifyClient.ConnectClose()

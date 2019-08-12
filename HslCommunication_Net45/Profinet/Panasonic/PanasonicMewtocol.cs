@@ -10,6 +10,149 @@ namespace HslCommunication.Profinet.Panasonic
     /// <summary>
     /// 松下PLC的数据交互协议，采用Mewtocol协议通讯
     /// </summary>
+    /// <remarks>
+    /// 触点地址的输入的格式说明如下：
+    /// <list type="table">
+    ///   <listheader>
+    ///     <term>地址名称</term>
+    ///     <term>地址代号</term>
+    ///     <term>示例</term>
+    ///     <term>地址进制</term>
+    ///     <term>字操作</term>
+    ///     <term>位操作</term>
+    ///     <term>备注</term>
+    ///   </listheader>
+    ///   <item>
+    ///     <term>外部输入继电器</term>
+    ///     <term>X</term>
+    ///     <term>X0,X100</term>
+    ///     <term>10</term>
+    ///     <term>×</term>
+    ///     <term>√</term>
+    ///     <term></term>
+    ///   </item>
+    ///   <item>
+    ///     <term>外部输出继电器</term>
+    ///     <term>Y</term>
+    ///     <term>Y0,Y100</term>
+    ///     <term>10</term>
+    ///     <term>×</term>
+    ///     <term>√</term>
+    ///     <term></term>
+    ///   </item>
+    ///   <item>
+    ///     <term>内部继电器</term>
+    ///     <term>R</term>
+    ///     <term>R0,R100</term>
+    ///     <term>10</term>
+    ///     <term>×</term>
+    ///     <term>√</term>
+    ///     <term></term>
+    ///   </item>
+    ///   <item>
+    ///     <term>定时器</term>
+    ///     <term>T</term>
+    ///     <term>T0,T100</term>
+    ///     <term>10</term>
+    ///     <term>×</term>
+    ///     <term>√</term>
+    ///     <term></term>
+    ///   </item>
+    ///   <item>
+    ///     <term>计数器</term>
+    ///     <term>C</term>
+    ///     <term>C0,C100</term>
+    ///     <term>10</term>
+    ///     <term>×</term>
+    ///     <term>√</term>
+    ///     <term></term>
+    ///   </item>
+    ///   <item>
+    ///     <term>链接继电器</term>
+    ///     <term>L</term>
+    ///     <term>L0,L100</term>
+    ///     <term>10</term>
+    ///     <term>×</term>
+    ///     <term>√</term>
+    ///     <term></term>
+    ///   </item>
+    /// </list>
+    /// 数据地址的输入的格式说明如下：
+    /// <list type="table">
+    ///   <listheader>
+    ///     <term>地址名称</term>
+    ///     <term>地址代号</term>
+    ///     <term>示例</term>
+    ///     <term>地址进制</term>
+    ///     <term>字操作</term>
+    ///     <term>位操作</term>
+    ///     <term>备注</term>
+    ///   </listheader>
+    ///   <item>
+    ///     <term>数据寄存器 DT</term>
+    ///     <term>D</term>
+    ///     <term>D0,D100</term>
+    ///     <term>10</term>
+    ///     <term>√</term>
+    ///     <term>×</term>
+    ///     <term></term>
+    ///   </item>
+    ///   <item>
+    ///     <term>链接寄存器 LT</term>
+    ///     <term>L</term>
+    ///     <term>L0,L100</term>
+    ///     <term>10</term>
+    ///     <term>√</term>
+    ///     <term>×</term>
+    ///     <term></term>
+    ///   </item>
+    ///   <item>
+    ///     <term>文件寄存器 FL</term>
+    ///     <term>F</term>
+    ///     <term>F0,F100</term>
+    ///     <term>10</term>
+    ///     <term>√</term>
+    ///     <term>×</term>
+    ///     <term></term>
+    ///   </item>
+    ///   <item>
+    ///     <term>目标值 SV</term>
+    ///     <term>S</term>
+    ///     <term>S0,S100</term>
+    ///     <term>10</term>
+    ///     <term>√</term>
+    ///     <term>×</term>
+    ///     <term></term>
+    ///   </item>
+    ///   <item>
+    ///     <term>经过值 EV</term>
+    ///     <term>K</term>
+    ///     <term>K0,K100</term>
+    ///     <term>10</term>
+    ///     <term>√</term>
+    ///     <term>×</term>
+    ///     <term></term>
+    ///   </item>
+    ///   <item>
+    ///     <term>索引寄存器 IX</term>
+    ///     <term>IX</term>
+    ///     <term>IX0,IX100</term>
+    ///     <term>10</term>
+    ///     <term>√</term>
+    ///     <term>×</term>
+    ///     <term></term>
+    ///   </item>
+    ///   <item>
+    ///     <term>索引寄存器 IY</term>
+    ///     <term>IY</term>
+    ///     <term>IY0,IY100</term>
+    ///     <term>10</term>
+    ///     <term>√</term>
+    ///     <term>×</term>
+    ///     <term></term>
+    ///   </item>
+    /// </list>
+    /// </remarks>
     public class PanasonicMewtocol : SerialDeviceBase<RegularByteTransform>
     {
         #region Constructor
@@ -82,12 +225,12 @@ namespace HslCommunication.Profinet.Panasonic
         #region Read Write Bool
 
         /// <summary>
-        /// 批量读取松下PLC的位地址
+        /// 批量读取松下PLC的位数据
         /// </summary>
         /// <param name="address">起始地址</param>
         /// <param name="length">数据长度</param>
         /// <returns>读取结果对象</returns>
-        public OperateResult<bool[]> ReadBool(string address, ushort length )
+        public override OperateResult<bool[]> ReadBool(string address, ushort length )
         {
             // 读取数据
             OperateResult<byte[]> read = Read( address, length );
@@ -99,26 +242,12 @@ namespace HslCommunication.Profinet.Panasonic
         }
 
         /// <summary>
-        /// 读取单个的Bool数据
-        /// </summary>
-        /// <param name="address">起始地址</param>
-        /// <returns>读取结果对象</returns>
-        public OperateResult<bool> ReadBool(string address )
-        {
-            // 读取数据
-            OperateResult<bool[]> read = ReadBool( address, 1 );
-            if (!read.IsSuccess) return OperateResult.CreateFailedResult<bool>( read );
-
-            return OperateResult.CreateSuccessResult( read.Content[0] );
-        }
-
-        /// <summary>
-        /// 写入bool数据信息
+        /// 写入bool数据信息，存在一定的风险，谨慎操作
         /// </summary>
         /// <param name="address">起始地址</param>
         /// <param name="values">数据值信息</param>
         /// <returns>返回是否成功的结果对象</returns>
-        public OperateResult Write(string address, bool[] values )
+        public override OperateResult Write(string address, bool[] values )
         {
             // 计算字节数据
             byte[] buffer = BasicFramework.SoftBasic.BoolArrayToByte( values );
@@ -135,15 +264,17 @@ namespace HslCommunication.Profinet.Panasonic
             return ExtraActualData( read.Content );
         }
 
+        #endregion
+
+        #region Object Override
+
         /// <summary>
-        /// 写入bool数据数据
+        /// 返回表示当前对象的字符串
         /// </summary>
-        /// <param name="address">起始地址</param>
-        /// <param name="value">True还是False</param>
-        /// <returns>返回是否成功的结果对象</returns>
-        public OperateResult Write( string address, bool value )
+        /// <returns>字符串信息</returns>
+        public override string ToString( )
         {
-            return Write( address, new bool[] { value } );
+            return $"Panasonic Mewtocol[{PortName}:{BaudRate}]";
         }
 
         #endregion
@@ -496,6 +627,5 @@ namespace HslCommunication.Profinet.Panasonic
         
 
         #endregion
-
     }
 }

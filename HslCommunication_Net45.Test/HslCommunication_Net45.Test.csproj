@@ -61,6 +61,7 @@
     <Compile Include="BasicFramework\SoftBufferTest.cs" />
     <Compile Include="BasicFramework\SoftSecurityTest.cs" />
     <Compile Include="BasicFramework\SoftZippedTest.cs" />
+    <Compile Include="Core\Reflection\HslReflectionHelperTest.cs" />
     <Compile Include="Core\Transfer\ReverseWordTransformTest4.cs" />
     <Compile Include="Core\Transfer\ReverseWordTransformTest3.cs" />
     <Compile Include="Documentation\Samples\Algorithms\ConnectPool.cs" />
@@ -94,17 +95,24 @@
     <Compile Include="Documentation\Samples\Profinet\OmronFinsNet.cs" />
     <Compile Include="Documentation\Samples\Profinet\SiemensFetchWriteNet.cs" />
     <Compile Include="Documentation\Samples\Profinet\SiemensS7Net.cs" />
+    <Compile Include="Documentation\Samples\Profinet\SiemensS7ServerExample.cs" />
     <Compile Include="Documentation\Samples\Serial\SoftCRC16.cs" />
+    <Compile Include="Enthernet\RedisClientTest.cs" />
     <Compile Include="Modbus\ModbusTcpTest.cs" />
     <Compile Include="Profinet\AllenBradley\AllenBradleyHelper.cs" />
+    <Compile Include="Profinet\FATEK\FatekProgramTest.cs" />
     <Compile Include="Profinet\Melsec\MelsecFxLinksTest.cs" />
     <Compile Include="Profinet\Melsec\MelsecFxSerialTest.cs" />
+    <Compile Include="Profinet\Melsec\MelsecMcAsciiNetTest.cs" />
+    <Compile Include="Profinet\Melsec\MelsecMcNetTest.cs" />
     <Compile Include="Profinet\Panasonic\PanasonicMewtocolTest.cs" />
+    <Compile Include="Profinet\Siemens\SiemensTest.cs" />
     <Compile Include="UnitTest1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Documentation\Samples\LogNet\" />
+    <Folder Include="Profinet\Keyence\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

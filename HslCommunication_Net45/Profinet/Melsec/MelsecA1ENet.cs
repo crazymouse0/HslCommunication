@@ -16,6 +16,72 @@ namespace HslCommunication.Profinet.Melsec
     /// <list type="number">
     /// <item>FX3U(C) PLC   测试人sandy_liao</item>
     /// </list>
+    /// 数据地址支持的格式如下：
+    /// <list type="table">
+    ///   <listheader>
+    ///     <term>地址名称</term>
+    ///     <term>地址代号</term>
+    ///     <term>示例</term>
+    ///     <term>地址进制</term>
+    ///     <term>字操作</term>
+    ///     <term>位操作</term>
+    ///     <term>备注</term>
+    ///   </listheader>
+    ///   <item>
+    ///     <term>内部继电器</term>
+    ///     <term>M</term>
+    ///     <term>M100,M200</term>
+    ///     <term>10</term>
+    ///     <term>√</term>
+    ///     <term>√</term>
+    ///     <term></term>
+    ///   </item>
+    ///   <item>
+    ///     <term>输入继电器</term>
+    ///     <term>X</term>
+    ///     <term>X10,X20</term>
+    ///     <term>8</term>
+    ///     <term>√</term>
+    ///     <term>√</term>
+    ///     <term></term>
+    ///   </item>
+    ///   <item>
+    ///     <term>输出继电器</term>
+    ///     <term>Y</term>
+    ///     <term>Y10,Y20</term>
+    ///     <term>8</term>
+    ///     <term>√</term>
+    ///     <term>√</term>
+    ///     <term></term>
+    ///   </item>
+    ///   <item>
+    ///     <term>步进继电器</term>
+    ///     <term>S</term>
+    ///     <term>S100,S200</term>
+    ///     <term>10</term>
+    ///     <term>√</term>
+    ///     <term>√</term>
+    ///     <term></term>
+    ///   </item>
+    ///   <item>
+    ///     <term>数据寄存器</term>
+    ///     <term>D</term>
+    ///     <term>D1000,D2000</term>
+    ///     <term>10</term>
+    ///     <term>√</term>
+    ///     <term>×</term>
+    ///     <term></term>
+    ///   </item>
+    ///   <item>
+    ///     <term>文件寄存器</term>
+    ///     <term>R</term>
+    ///     <term>R100,R200</term>
+    ///     <term>10</term>
+    ///     <term>√</term>
+    ///     <term>×</term>
+    ///     <term></term>
+    ///   </item>
+    /// </list>
     /// <note type="important">本通讯类由CKernal推送，感谢</note>
     /// </remarks>
     public class MelsecA1ENet : NetworkDeviceBase<MelsecA1EBinaryMessage, RegularByteTransform>
@@ -78,15 +144,13 @@ namespace HslCommunication.Profinet.Melsec
             return ExtractActualData(read.Content, false);
         }
 
-
-
         /// <summary>
         /// 从三菱PLC中批量读取位软元件，返回读取结果
         /// </summary>
         /// <param name="address">起始地址</param>
         /// <param name="length">读取的长度</param>
         /// <returns>带成功标志的结果数据对象</returns>
-        public OperateResult<bool[]> ReadBool(string address, ushort length)
+        public override OperateResult<bool[]> ReadBool(string address, ushort length)
         {
             // 获取指令
             var command = BuildReadCommand( address, length, true, PLCNumber );
@@ -106,22 +170,6 @@ namespace HslCommunication.Profinet.Melsec
             // 转化bool数组
             return OperateResult.CreateSuccessResult( extract.Content.Select( m => m == 0x01 ).Take( length ).ToArray( ) );
         }
-
-
-
-        /// <summary>
-        /// 从三菱PLC中批量读取位软元件，返回读取结果
-        /// </summary>
-        /// <param name="address">起始地址</param>
-        /// <returns>带成功标志的结果数据对象</returns>
-        public OperateResult<bool> ReadBool( string address )
-        {
-            OperateResult<bool[]> read = ReadBool( address, 1 );
-            if (!read.IsSuccess) return OperateResult.CreateFailedResult<bool>( read );
-
-            return OperateResult.CreateSuccessResult<bool>( read.Content[0] );
-        }
-
 
         #endregion
 
@@ -161,24 +209,12 @@ namespace HslCommunication.Profinet.Melsec
         /// 向PLC中位软元件写入bool数组，返回值说明，比如你写入M100,values[0]对应M100
         /// </summary>
         /// <param name="address">要写入的数据地址</param>
-        /// <param name="value">要写入的实际数据，长度为8的倍数</param>
-        /// <returns>返回写入结果</returns>
-        public OperateResult Write(string address, bool value)
-        {
-            return Write(address, new bool[] { value });
-        }
-
-        /// <summary>
-        /// 向PLC中位软元件写入bool数组，返回值说明，比如你写入M100,values[0]对应M100
-        /// </summary>
-        /// <param name="address">要写入的数据地址</param>
         /// <param name="values">要写入的实际数据，可以指定任意的长度</param>
         /// <returns>返回写入结果</returns>
-        public OperateResult Write(string address, bool[] values)
+        public override OperateResult Write(string address, bool[] values)
         {
             return Write(address, values.Select(m => m ? (byte)0x01 : (byte)0x00).ToArray());
         }
-
 
         #endregion
         
